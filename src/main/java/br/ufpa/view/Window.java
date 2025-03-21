@@ -270,6 +270,7 @@ public class Window extends JFrame {
         JPanel buttonPanel = new JPanel();
         JButton btnClose = new JButton("Fechar");
         JButton btnDelete = new JButton("Excluir");
+        JButton btnEdit = new JButton("Editar");
 
         // Listener para o botão "Excluir"
         btnDelete.addActionListener(e -> {
@@ -297,9 +298,15 @@ public class Window extends JFrame {
             }
         });
 
+        // Listener para o botão "Editar"
+        btnEdit.addActionListener(e -> {
+            detailsDialog.dispose(); // Fecha a janela de detalhes
+            openEditWindow(character); // Abre a janela de edição
+        });
+
         // Listener para o botão "Fechar"
         btnClose.addActionListener(e -> detailsDialog.dispose());
-
+        buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnClose);
         detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
@@ -316,6 +323,78 @@ public class Window extends JFrame {
         panel.add(new JLabel(value));
     }
 
+    private void openEditWindow(Character character) {
+        JDialog editDialog = new JDialog(this, "Editar Personagem", true);
+        editDialog.setSize(600, 500);
+        editDialog.setLayout(new BorderLayout());
+    
+        // --- Campos do Formulário (PRÉ-PREENCHIDOS) ---
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+    
+        // Campos comuns
+        JTextField txtName = new JTextField(character.getName());
+        JTextArea txtDescription = new JTextArea(character.getDescription());
+        JTextArea txtPowers = new JTextArea(character.getPowers());
+        JTextField txtTeam = new JTextField(character.getTeam());
+        JTextArea txtSkills = new JTextArea(character.getSkills());
+        JTextField txtImagePath = new JTextField(); // Campo para nova imagem (opcional)
+        JTextField txtVideoPath = new JTextField(); // Campo para novo vídeo (opcional)
+    
+        // Campos específicos (Herói/Vilão)
+        JTextField txtSpecificField;
+        if (character instanceof SuperHero) {
+            txtSpecificField = new JTextField(((SuperHero) character).getUniverse());
+        } else {
+            txtSpecificField = new JTextField(String.valueOf(((SuperVillain) character).getThreatLevel()));
+        }
+    
+        // Adicionar campos ao painel
+        addFormField(formPanel, "Nome:", txtName);
+        addFormField(formPanel, "Descrição:", new JScrollPane(txtDescription));
+        addFormField(formPanel, "Poderes:", new JScrollPane(txtPowers));
+        addFormField(formPanel, "Grupo:", txtTeam);
+        addFormField(formPanel, "Habilidades:", new JScrollPane(txtSkills));
+        addFormField(formPanel, (character instanceof SuperHero) ? "Universo:" : "Nível de Ameaça:", txtSpecificField);
+    
+        // --- Botões de Ação ---
+        JButton btnSave = new JButton("Salvar");
+        JButton btnCancel = new JButton("Cancelar");
+    
+        btnSave.addActionListener(e -> {
+            // Coletar dados atualizados
+            Map<String, String> updatedData = new HashMap<>();
+            updatedData.put("id", String.valueOf(character.getId())); // ID obrigatório
+            updatedData.put("name", txtName.getText());
+            updatedData.put("description", txtDescription.getText());
+            updatedData.put("powers", txtPowers.getText());
+            updatedData.put("team", txtTeam.getText());
+            updatedData.put("skills", txtSkills.getText());
+            updatedData.put("specificField", txtSpecificField.getText());
+            updatedData.put("imagePath", txtImagePath.getText()); // Opcional
+            updatedData.put("videoPath", txtVideoPath.getText()); // Opcional
+    
+            try {
+                CharacterController controller = new CharacterController();
+                controller.updateCharacter(character, updatedData); // Chama o Controller
+                editDialog.dispose();
+                refreshAlbum(); // Atualiza a lista
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(editDialog, "Erro: " + ex.getMessage(), "Falha na Edição", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    
+        btnCancel.addActionListener(e -> editDialog.dispose());
+    
+        // --- Montagem Final ---
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(btnSave);
+        buttonPanel.add(btnCancel);
+        editDialog.add(formPanel, BorderLayout.CENTER);
+        editDialog.add(buttonPanel, BorderLayout.SOUTH);
+        editDialog.setLocationRelativeTo(this);
+        editDialog.setVisible(true);
+    }
+    
     // Getter para o painel do álbum
     public Map<String, String> getFormData() {
         Map<String, String> data = new HashMap<>();
