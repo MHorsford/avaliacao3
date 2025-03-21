@@ -4,20 +4,35 @@ import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 //import java.util.ArrayList;
 
+import br.ufpa.controller.CharacterController;
 import br.ufpa.model.Character;
 import br.ufpa.model.SuperHero;
 import br.ufpa.model.SuperVillain;
 import br.ufpa.model.dao.CharacterDAOImpl;
 
 import java.awt.*;
+import java.util.Map;
 
 
 public class Window extends JFrame {
 
     private JPanel albumPanel; // Painel do álbum
+    // Campos do formulário (DECLARE-OS AQUI!)
+    private JTextField txtName;
+    private JTextArea txtDescription;
+    private JTextArea txtPowers;
+    private JTextField txtTeam;
+    private JTextArea txtSkills;
+    private JTextField txtUniverse;      // Aba Herói
+    private JTextField txtThreatLevel;   // Aba Vilão
+    private JTextField txtImagePath;     // Campo para imagem
+    private JTextField txtVideoPath;     // Campo para vídeo
+
 
     public Window() {
         initUI();
@@ -53,44 +68,89 @@ public class Window extends JFrame {
 
         // ------ Formulário Principal (Campos Comuns) ------
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
-
+        // --- Campos para Imagem e Vídeo ---
+        JPanel mediaPanel = new JPanel(new GridLayout(0, 2, 5, 5));
         // Nome
-        JTextField txtName = new JTextField();
+        txtName = new JTextField();
         addFormField(formPanel, "Nome:", txtName);
 
         // Descrição
-        JTextArea txtDescription = new JTextArea(3, 20);
+        txtDescription = new JTextArea(3, 20);
         addFormField(formPanel, "Descrição:", new JScrollPane(txtDescription));
 
         // Poderes
-        JTextArea txtPowers = new JTextArea(3, 20);
+        txtPowers = new JTextArea(3, 20);
         addFormField(formPanel, "Poderes:", new JScrollPane(txtPowers));
 
         // Grupo
-        JTextField txtTeam = new JTextField();
+        txtTeam = new JTextField();
         addFormField(formPanel, "Grupo:", txtTeam);
 
         // Habilidades
-        JTextArea txtSkills = new JTextArea(3, 20);
+        txtSkills = new JTextArea(3, 20);
         addFormField(formPanel, "Habilidades:", new JScrollPane(txtSkills));
 
         // ------ Abas para Campos Específicos ------
         JTabbedPane tabbedPane = new JTabbedPane();
 
+
         // Aba Herói
         JPanel heroTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JTextField txtUniverse = new JTextField(15);
+        txtUniverse = new JTextField(15);
         heroTab.add(new JLabel("Universo (Marvel/DC):"));
         heroTab.add(txtUniverse);
 
         // Aba Vilão
         JPanel villainTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JTextField txtThreatLevel = new JTextField(5);
+        txtThreatLevel = new JTextField(5);
         villainTab.add(new JLabel("Nível de Ameaça (1-10):"));
         villainTab.add(txtThreatLevel);
 
+
+
+        //--------------------------------------
+
         tabbedPane.addTab("Herói", heroTab);
         tabbedPane.addTab("Vilão", villainTab);
+
+        // Campo para imagem
+        txtImagePath = new JTextField();
+        JButton btnBrowseImage = new JButton("Procurar");
+        mediaPanel.add(new JLabel("Imagem:"));
+        mediaPanel.add(txtImagePath);
+        mediaPanel.add(new JLabel(""));
+        mediaPanel.add(btnBrowseImage);
+
+        // Campo para vídeo
+        txtVideoPath = new JTextField();
+        JButton btnBrowseVideo = new JButton("Procurar");
+        mediaPanel.add(new JLabel("Vídeo:"));
+        mediaPanel.add(txtVideoPath);
+        mediaPanel.add(new JLabel(""));
+        mediaPanel.add(btnBrowseVideo);
+
+        formPanel.add(mediaPanel);
+
+        // Dentro de createRegistrationPanel(), após criar os botões:
+
+        // File chooser para imagem
+        btnBrowseImage.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(Window.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                txtImagePath.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            }
+        });
+
+        // File chooser para vídeo
+        btnBrowseVideo.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(Window.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                txtVideoPath.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            }
+        });
+
 
         // ------ Botões de Ação ------
         JButton btnAdd = new JButton("Adicionar");
@@ -98,6 +158,17 @@ public class Window extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.add(btnClear);
         buttonPanel.add(btnAdd);
+
+        btnAdd.addActionListener(e -> {
+            CharacterController controller = new CharacterController();
+            try {
+                Map<String, String> formData = getFormData();
+                controller.saveCharacter(formData);
+                refreshAlbum(); // Atualiza a lista
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
         // ------ Montagem Final ------
         registrationPanel.add(formPanel, BorderLayout.NORTH);
@@ -212,4 +283,18 @@ public class Window extends JFrame {
     }
 
     // Getter para o painel do álbum
+    public Map<String, String> getFormData() {
+        Map<String, String> data = new HashMap<>();
+        data.put("name", txtName.getText());
+        data.put("description", txtDescription.getText());
+        data.put("powers", txtPowers.getText());
+        data.put("team", txtTeam.getText());
+        data.put("skills", txtSkills.getText());
+        data.put("imagePath", txtImagePath.getText());
+        data.put("videoPath", txtVideoPath.getText());
+        data.put("universe", txtUniverse.getText());         // Aba herói
+        data.put("threatLevel", txtThreatLevel.getText());   // Aba vilão
+        return data;
+    }
+
 }
