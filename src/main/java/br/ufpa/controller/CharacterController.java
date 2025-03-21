@@ -41,4 +41,9 @@ public class CharacterController {
             dao.save(villain);
         }
     }
+
+        // Método para exclusão
+    public void deleteCharacter(int id) {
+        dao.delete(id); // Chama o DAO
+    }
 }

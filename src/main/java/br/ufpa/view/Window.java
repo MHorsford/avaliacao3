@@ -90,28 +90,24 @@ public class Window extends JFrame {
         txtSkills = new JTextArea(3, 20);
         addFormField(formPanel, "Habilidades:", new JScrollPane(txtSkills));
 
-        // ------ Abas para Campos Específicos ------
+        // --- Abas para Campos Específicos ---
         JTabbedPane tabbedPane = new JTabbedPane();
-
 
         // Aba Herói
         JPanel heroTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        txtUniverse = new JTextField(15);
+        txtUniverse = new JTextField(15); // Já declarado como variável de instância
         heroTab.add(new JLabel("Universo (Marvel/DC):"));
-        heroTab.add(txtUniverse);
+        heroTab.add(txtUniverse); // <-- Adicione o campo à aba
 
         // Aba Vilão
         JPanel villainTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        txtThreatLevel = new JTextField(5);
+        txtThreatLevel = new JTextField(5); // Já declarado como variável de instância
         villainTab.add(new JLabel("Nível de Ameaça (1-10):"));
-        villainTab.add(txtThreatLevel);
-
-
-
-        //--------------------------------------
+        villainTab.add(txtThreatLevel); // <-- Adicione o campo à aba
 
         tabbedPane.addTab("Herói", heroTab);
         tabbedPane.addTab("Vilão", villainTab);
+
 
         // Campo para imagem
         txtImagePath = new JTextField();
@@ -269,6 +265,44 @@ public class Window extends JFrame {
         } else {
             imgLabel.setText("Sem imagem");
         }
+
+                // --- Botões de Ação (Fechar e Excluir) ---
+        JPanel buttonPanel = new JPanel();
+        JButton btnClose = new JButton("Fechar");
+        JButton btnDelete = new JButton("Excluir");
+
+        // Listener para o botão "Excluir"
+        btnDelete.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                detailsDialog,
+                "Tem certeza que deseja excluir " + character.getName() + "?",
+                "Confirmar Exclusão",
+                JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                CharacterController controller = new CharacterController();
+                try {
+                    controller.deleteCharacter(character.getId()); // Passa o ID
+                    detailsDialog.dispose(); // Fecha a janela
+                    refreshAlbum(); // Atualiza a lista
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(
+                        detailsDialog,
+                        "Erro: " + ex.getMessage(),
+                        "Falha na Exclusão",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        });
+
+        // Listener para o botão "Fechar"
+        btnClose.addActionListener(e -> detailsDialog.dispose());
+
+        buttonPanel.add(btnDelete);
+        buttonPanel.add(btnClose);
+        detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
 
         // Layout
         detailsDialog.add(infoPanel, BorderLayout.CENTER);
