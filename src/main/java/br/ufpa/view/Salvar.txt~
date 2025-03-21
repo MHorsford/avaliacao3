@@ -1,0 +1,209 @@
+package br.ufpa.view;
+
+import javax.swing.*;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
+//import java.util.ArrayList;
+
+import br.ufpa.model.Character;
+import br.ufpa.model.SuperHero;
+import br.ufpa.model.SuperVillain;
+import br.ufpa.model.dao.CharacterDAOImpl;
+
+import java.awt.*;
+
+
+public class Window extends JFrame {
+
+    private JPanel albumPanel; // Painel do álbum
+
+    public Window() {
+        initUI();
+    }
+
+    private void initUI() {
+        setTitle("Gerenciador de Heróis/Vilões");
+        setSize(1200, 800);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        // Painel de cadastro
+        JPanel registrationPanel = createRegistrationPanel();
+
+        // Painel do álbum
+        albumPanel = new JPanel(new GridLayout(0, 3, 10, 10)); // 3 colunas
+        JScrollPane albumScroll = new JScrollPane(albumPanel);
+
+        // Divisão principal
+        JSplitPane splitPane = new JSplitPane(
+                JSplitPane.HORIZONTAL_SPLIT,
+                registrationPanel,
+                albumScroll
+        );
+        splitPane.setDividerLocation(400);
+
+        add(splitPane, BorderLayout.CENTER);
+    }
+
+    private JPanel createRegistrationPanel() {
+        JPanel registrationPanel = new JPanel(new BorderLayout(10, 10));
+        registrationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // ------ Formulário Principal (Campos Comuns) ------
+        JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+
+        // Nome
+        JTextField txtName = new JTextField();
+        addFormField(formPanel, "Nome:", txtName);
+
+        // Descrição
+        JTextArea txtDescription = new JTextArea(3, 20);
+        addFormField(formPanel, "Descrição:", new JScrollPane(txtDescription));
+
+        // Poderes
+        JTextArea txtPowers = new JTextArea(3, 20);
+        addFormField(formPanel, "Poderes:", new JScrollPane(txtPowers));
+
+        // Grupo
+        JTextField txtTeam = new JTextField();
+        addFormField(formPanel, "Grupo:", txtTeam);
+
+        // Habilidades
+        JTextArea txtSkills = new JTextArea(3, 20);
+        addFormField(formPanel, "Habilidades:", new JScrollPane(txtSkills));
+
+        // ------ Abas para Campos Específicos ------
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Aba Herói
+        JPanel heroTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField txtUniverse = new JTextField(15);
+        heroTab.add(new JLabel("Universo (Marvel/DC):"));
+        heroTab.add(txtUniverse);
+
+        // Aba Vilão
+        JPanel villainTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField txtThreatLevel = new JTextField(5);
+        villainTab.add(new JLabel("Nível de Ameaça (1-10):"));
+        villainTab.add(txtThreatLevel);
+
+        tabbedPane.addTab("Herói", heroTab);
+        tabbedPane.addTab("Vilão", villainTab);
+
+        // ------ Botões de Ação ------
+        JButton btnAdd = new JButton("Adicionar");
+        JButton btnClear = new JButton("Limpar");
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(btnClear);
+        buttonPanel.add(btnAdd);
+
+        // ------ Montagem Final ------
+        registrationPanel.add(formPanel, BorderLayout.NORTH);
+        registrationPanel.add(tabbedPane, BorderLayout.CENTER);
+        registrationPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        return registrationPanel;
+    }
+
+    // Método auxiliar para adicionar campos com rótulo
+    private void addFormField(JPanel panel, String label, JComponent component) {
+        panel.add(new JLabel(label));
+        panel.add(component);
+    }
+
+    // Método para criar um card de personagem
+    public void refreshAlbum() {
+        albumPanel.removeAll(); // Limpa o painel
+
+        CharacterDAOImpl dao = new CharacterDAOImpl();
+        List<Character> characters = dao.getAllCharacters();// Lista unificada
+
+        for (Character character : characters) {
+            JPanel card = createCharacterCard(character);
+            albumPanel.add(card);
+        }
+
+        albumPanel.revalidate(); // Atualiza o layout
+        albumPanel.repaint(); // Redesenha a interface
+    }
+
+    private JPanel createCharacterCard(Character character) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBorder(BorderFactory.createEtchedBorder());
+        card.setPreferredSize(new Dimension(200, 250));
+
+        // Nome e Tipo
+        String type = (character instanceof SuperHero) ? "[HERÓI] " : "[VILÃO] ";
+        JLabel nameLabel = new JLabel(type + character.getName());
+        card.add(nameLabel, BorderLayout.NORTH);
+
+        // Imagem (se existir)
+        if (character.getImage() != null && character.getImage().length > 0) {
+            ImageIcon icon = new ImageIcon(character.getImage());
+            Image scaledImage = icon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+            card.add(new JLabel(new ImageIcon(scaledImage)), BorderLayout.CENTER);
+        } else {
+            card.add(new JLabel("Sem imagem"), BorderLayout.CENTER);
+        }
+
+        // Adiciona listener ao card
+        // Adiciona listener de clique
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showCharacterDetails(character);
+            }
+        });
+
+        return card;
+    }
+
+    private void showCharacterDetails(Character character) {
+        JDialog detailsDialog = new JDialog(this, "Detalhes do Personagem", true);
+        detailsDialog.setSize(800, 700);
+        detailsDialog.setLayout(new BorderLayout());
+
+        // Painel de informações
+        JPanel infoPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Campos
+        addInfoField(infoPanel, "Nome:", character.getName());
+        addInfoField(infoPanel, "Descrição:", character.getDescription());
+        addInfoField(infoPanel, "Poderes:", character.getPowers());
+        addInfoField(infoPanel, "Grupo:", character.getTeam());
+        addInfoField(infoPanel, "Habilidades:", character.getSkills());
+
+        // Campos específicos
+        if (character instanceof SuperHero) {
+            addInfoField(infoPanel, "Universo:", ((SuperHero) character).getUniverse());
+        } else if (character instanceof SuperVillain) {
+            addInfoField(infoPanel, "Nível de Ameaça:", String.valueOf(((SuperVillain) character).getThreatLevel()));
+        }
+
+        // Imagem
+        JLabel imgLabel = new JLabel();
+        if (character.getImage() != null && character.getImage().length > 0) {
+            ImageIcon icon = new ImageIcon(character.getImage());
+            Image scaled = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            imgLabel.setIcon(new ImageIcon(scaled));
+        } else {
+            imgLabel.setText("Sem imagem");
+        }
+
+        // Layout
+        detailsDialog.add(infoPanel, BorderLayout.CENTER);
+        detailsDialog.add(imgLabel, BorderLayout.EAST);
+        detailsDialog.setLocationRelativeTo(this);
+        detailsDialog.setVisible(true);
+    }
+
+    private void addInfoField(JPanel panel, String label, String value) {
+        panel.add(new JLabel(label));
+        panel.add(new JLabel(value));
+    }
+
+    // Getter para o painel do álbum
+}
