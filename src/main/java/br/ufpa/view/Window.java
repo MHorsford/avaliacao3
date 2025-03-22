@@ -23,15 +23,15 @@ public class Window extends JFrame {
 
     private JPanel albumPanel; // Painel do álbum
     // Campos do formulário (DECLARE-OS AQUI!)
-    private JTextField txtName;
-    private JTextArea txtDescription;
-    private JTextArea txtPowers;
-    private JTextField txtTeam;
-    private JTextArea txtSkills;
-    private JTextField txtUniverse;      // Aba Herói
-    private JTextField txtThreatLevel;   // Aba Vilão
-    private JTextField txtImagePath;     // Campo para imagem
-    private JTextField txtVideoPath;     // Campo para vídeo
+    private JTextField txtName = new JTextField(); 
+    private JTextArea txtDescription = new JTextArea(3, 20); 
+    private JTextArea txtPowers = new JTextArea(3, 20); 
+    private JTextField txtTeam = new JTextField(); 
+    private JTextArea txtSkills = new JTextArea(3, 20); 
+    private JTextField txtUniverse = new JTextField(15);
+    private JTextField txtThreatLevel = new JTextField(5); 
+    private JTextField txtImagePath = new JTextField();
+    private JTextField txtVideoPath = new JTextField(); 
 
 
     public Window() {
@@ -65,69 +65,59 @@ public class Window extends JFrame {
     private JPanel createRegistrationPanel() {
         JPanel registrationPanel = new JPanel(new BorderLayout(10, 10));
         registrationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 
         // ------ Formulário Principal (Campos Comuns) ------
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
-        // --- Campos para Imagem e Vídeo ---
-        JPanel mediaPanel = new JPanel(new GridLayout(0, 2, 5, 5));
-        // Nome
-        txtName = new JTextField();
+
+        // Adicione os campos comuns
         addFormField(formPanel, "Nome:", txtName);
-
-        // Descrição
-        txtDescription = new JTextArea(3, 20);
         addFormField(formPanel, "Descrição:", new JScrollPane(txtDescription));
-
-        // Poderes
-        txtPowers = new JTextArea(3, 20);
         addFormField(formPanel, "Poderes:", new JScrollPane(txtPowers));
-
-        // Grupo
-        txtTeam = new JTextField();
         addFormField(formPanel, "Grupo:", txtTeam);
-
-        // Habilidades
-        txtSkills = new JTextArea(3, 20);
         addFormField(formPanel, "Habilidades:", new JScrollPane(txtSkills));
 
-        // --- Abas para Campos Específicos ---
-        JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Aba Herói
-        JPanel heroTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        txtUniverse = new JTextField(15); // Já declarado como variável de instância
-        heroTab.add(new JLabel("Universo (Marvel/DC):"));
-        heroTab.add(txtUniverse); // <-- Adicione o campo à aba
+        // --- Campos para Imagem e Vídeo ---
+        JPanel mediaPanel = new JPanel(new GridLayout(0, 2, 5, 5));
 
-        // Aba Vilão
-        JPanel villainTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        txtThreatLevel = new JTextField(5); // Já declarado como variável de instância
-        villainTab.add(new JLabel("Nível de Ameaça (1-10):"));
-        villainTab.add(txtThreatLevel); // <-- Adicione o campo à aba
-
-        tabbedPane.addTab("Herói", heroTab);
-        tabbedPane.addTab("Vilão", villainTab);
-
-
-        // Campo para imagem
         txtImagePath = new JTextField();
         JButton btnBrowseImage = new JButton("Procurar");
+        txtVideoPath = new JTextField();
+        JButton btnBrowseVideo = new JButton("Procurar");
         mediaPanel.add(new JLabel("Imagem:"));
         mediaPanel.add(txtImagePath);
         mediaPanel.add(new JLabel(""));
         mediaPanel.add(btnBrowseImage);
-
-        // Campo para vídeo
-        txtVideoPath = new JTextField();
-        JButton btnBrowseVideo = new JButton("Procurar");
         mediaPanel.add(new JLabel("Vídeo:"));
         mediaPanel.add(txtVideoPath);
         mediaPanel.add(new JLabel(""));
         mediaPanel.add(btnBrowseVideo);
 
-        formPanel.add(mediaPanel);
+        // Adicione o mediaPanel ao formPanel como uma nova linha
+        formPanel.add(new JLabel("Mídia:"));
+        formPanel.add(mediaPanel); // Adiciona em uma nova linha do GridLayout
 
-        // Dentro de createRegistrationPanel(), após criar os botões:
+        JPanel commonFieldsPanel = new JPanel(new BorderLayout(10, 10));
+        commonFieldsPanel.add(formPanel, BorderLayout.NORTH);
+        commonFieldsPanel.add(mediaPanel, BorderLayout.CENTER);
+        mainPanel.add(commonFieldsPanel, BorderLayout.NORTH);
+
+
+        // --- Abas para Campos Específicos ---
+        // Dentro de createRegistrationPanel():
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setPreferredSize(new Dimension(100, 100)); 
+        JPanel heroTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        heroTab.add(new JLabel("Universo (Marvel/DC):"));
+        heroTab.add(txtUniverse);
+        JPanel villainTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        villainTab.add(new JLabel("Nível de Ameaça (1-10):"));
+        villainTab.add(txtThreatLevel);
+        tabbedPane.addTab("Herói", heroTab);
+        tabbedPane.addTab("Vilão", villainTab);
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+
 
         // File chooser para imagem
         btnBrowseImage.addActionListener(e -> {
@@ -167,8 +157,7 @@ public class Window extends JFrame {
         });
 
         // ------ Montagem Final ------
-        registrationPanel.add(formPanel, BorderLayout.NORTH);
-        registrationPanel.add(tabbedPane, BorderLayout.CENTER);
+        registrationPanel.add(mainPanel, BorderLayout.CENTER);
         registrationPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         return registrationPanel;
