@@ -2,9 +2,14 @@ package br.ufpa.model;
 
 import java.io.IOException;
 
-public class SuperVillain extends Character {
-    private int threatLevel; // Example: 1 to 10
+/* 
+* Classe representa  um  objeto do tipo Super-Vilão
+*/
 
+public class SuperVillain extends Character {
+    private int threatLevel; // Exemplo: 1 - 10
+
+    // contrutor padrão
     public SuperVillain(String name, String description, String powers,
                         String team, String skills, byte[] image,
                         byte[] video, int threatLevel) {
@@ -18,7 +23,7 @@ public class SuperVillain extends Character {
         super(name, description, powers, team, skills, imagePath, videoPath);
         this.threatLevel = threatLevel;
     }
-    // Specific Getter/Setter
+    // Getter e Setter especificos da classe
     public int getThreatLevel() { return threatLevel; }
     public void setThreatLevel(int threatLevel) { this.threatLevel = threatLevel; }
 

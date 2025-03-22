@@ -4,7 +4,9 @@ import br.ufpa.model.SuperHero;
 import br.ufpa.model.SuperVillain;
 import br.ufpa.model.Character;
 import java.util.List;
-
+/*
+ * Implementando o conseito de interfaces e sobrecargas de métodos
+ */
 public interface CharacterDAO {
     void save(SuperHero hero);
     void save(SuperVillain villain);

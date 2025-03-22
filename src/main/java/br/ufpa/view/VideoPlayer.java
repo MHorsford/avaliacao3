@@ -15,18 +15,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-
+/*
+ * VideoPlayer é uma classe que permite exibir um vídeo
+ */
 public class VideoPlayer {
     private JDialog dialog;
     private MediaPlayer mediaPlayer;
     private Character character;
     private File tempVideoFile;
 
+    //  Construtor para o objeto Character
+    // Abstração é utilizada para permitir os dois tipos derivados de Character (SuperHero e SuperVillain)
     public VideoPlayer(Character character) {
         this.character = character;
         initialize();
     }
 
+    // Inicializa o diálogo e configura os componentes
     private void initialize() {
         dialog = new JDialog();
         dialog.setTitle("Player de Vídeo - " + character.getName());
@@ -60,6 +65,7 @@ public class VideoPlayer {
         dialog.setVisible(true);
     }
 
+    // Carrega o vídeo
     private void loadVideo(JFXPanel jfxPanel) {
         Platform.runLater(() -> {
             try {
@@ -73,11 +79,10 @@ public class VideoPlayer {
                 MediaView mediaView = new MediaView(mediaPlayer);
                 mediaView.setPreserveRatio(true);
 
-                // Layout JavaFX
                 Scene scene = new Scene(new javafx.scene.Group(mediaView), 800, 500);
                 jfxPanel.setScene(scene);
 
-                // Remove arquivo ao fechar
+                // Remove arquivo ao fechar a janela
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosed(java.awt.event.WindowEvent e) {
@@ -92,6 +97,7 @@ public class VideoPlayer {
         });
     }
 
+    // Métodos para controlar o vídeo (play e pause)
     private void play() {
         if (mediaPlayer != null) mediaPlayer.play();
     }

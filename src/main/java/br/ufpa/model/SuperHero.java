@@ -1,10 +1,13 @@
 package br.ufpa.model;
 
 import java.io.IOException;
-
+/*
+ * Classe representa  um  objeto do tipo Super-Herói
+ */
 public class SuperHero extends Character {
-    private String universe; // Example: Marvel/DC
+    private String universe; // Exemplo: Marvel/DC
 
+    // contrutor padrão
     public SuperHero(String name, String description, String powers,
                      String team, String skills, byte[] image,
                      byte[] video, String universe) {
@@ -19,7 +22,7 @@ public class SuperHero extends Character {
         this.universe = universe;
     }
 
-    // Specific Getter/Setter
+    // Getter e Setter especificos da classe
     public String getUniverse() { return universe; }
     public void setUniverse(String universe) { this.universe = universe; }
 

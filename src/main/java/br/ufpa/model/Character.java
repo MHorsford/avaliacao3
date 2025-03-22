@@ -4,18 +4,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+/*
+ * Classe representa um objeto abstrato que pode dar origem a um Super-Herói ou Super-Vilão
+ * Implementação para o conceito de abstração
+ */
 public abstract class Character {
-    // Common attributes
+    // Atributos
     private int id;
     private String name;
     private String description;
     private String powers;
     private String team;
     private String skills;
-    private byte[] image; // BLOB for image
-    private byte[] video; // BLOB for video
+    private byte[] image; 
+    private byte[] video; 
 
-    // Constructor Principal
+    // Constructor Padrão
     public Character(String name, String description, String powers,
                      String team, String skills, byte[] image,
                      byte[] video) {
@@ -28,7 +33,7 @@ public abstract class Character {
         this.video = video;
     }
 
-    // Construtor sobrecarregado (aceita caminhos de arquivo)
+    // Construtor sobrecarregado para aceitar o caminho do arquivo
     public Character(String name, String description, String powers,
                      String team, String skills, String imagePath,
                      String videoPath) throws IOException {
@@ -43,6 +48,7 @@ public abstract class Character {
         );
     }
 
+    // Metodo para o path do arquivo ser convertido em bytes
     protected static byte[] convertFileToBytes(String filePath) throws IOException {
         if (filePath == null || filePath.isEmpty()) {
             throw new IllegalArgumentException("O caminho do arquivo não pode ser nulo ou vazio.");
@@ -55,6 +61,7 @@ public abstract class Character {
     }
 
 
+    // Metodo para converter um recurso em bytes
     protected static byte[] convertResourceToBytes(String resourcePath) throws IOException {
         try (InputStream is = Character.class.getClassLoader().getResourceAsStream(resourcePath)) {
             if (is == null) {
@@ -65,7 +72,7 @@ public abstract class Character {
     }
 
 
-    // Getters and Setters (encapsulation)
+    // Getters e Setters
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

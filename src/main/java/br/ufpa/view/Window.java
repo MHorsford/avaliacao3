@@ -1,22 +1,20 @@
 package br.ufpa.view;
 
 import javax.swing.*;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-//import java.util.ArrayList;
+import java.awt.*;
+import java.util.Map;
 
+// Importações do projeto
 import br.ufpa.controller.CharacterController;
 import br.ufpa.model.Character;
 import br.ufpa.model.SuperHero;
 import br.ufpa.model.SuperVillain;
 import br.ufpa.model.dao.CharacterDAOImpl;
-
-import java.awt.*;
-import java.util.Map;
 
 
 public class Window extends JFrame {
@@ -67,10 +65,9 @@ public class Window extends JFrame {
         registrationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 
-        // ------ Formulário Principal (Campos Comuns) ------
+        // ------ Formulário Principal ------
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
 
-        // Adicione os campos comuns
         addFormField(formPanel, "Nome:", txtName);
         addFormField(formPanel, "Descrição:", new JScrollPane(txtDescription));
         addFormField(formPanel, "Poderes:", new JScrollPane(txtPowers));
@@ -94,9 +91,8 @@ public class Window extends JFrame {
         mediaPanel.add(new JLabel(""));
         mediaPanel.add(btnBrowseVideo);
 
-        // Adicione o mediaPanel ao formPanel como uma nova linha
         formPanel.add(new JLabel("Mídia:"));
-        formPanel.add(mediaPanel); // Adiciona em uma nova linha do GridLayout
+        formPanel.add(mediaPanel); 
 
         JPanel commonFieldsPanel = new JPanel(new BorderLayout(10, 10));
         commonFieldsPanel.add(formPanel, BorderLayout.NORTH);
@@ -105,21 +101,24 @@ public class Window extends JFrame {
 
 
         // --- Abas para Campos Específicos ---
-        // Dentro de createRegistrationPanel():
         JTabbedPane tabbedPane = new JTabbedPane();
+        // Heroi
         tabbedPane.setPreferredSize(new Dimension(100, 100)); 
         JPanel heroTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
         heroTab.add(new JLabel("Universo (Marvel/DC):"));
         heroTab.add(txtUniverse);
+        // Vilão
         JPanel villainTab = new JPanel(new FlowLayout(FlowLayout.LEFT));
         villainTab.add(new JLabel("Nível de Ameaça (1-10):"));
         villainTab.add(txtThreatLevel);
+
         tabbedPane.addTab("Herói", heroTab);
         tabbedPane.addTab("Vilão", villainTab);
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
 
-        // File chooser para imagem
+        // --- Botões de Ação ---
+        // Imagem
         btnBrowseImage.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(Window.this);
@@ -128,7 +127,7 @@ public class Window extends JFrame {
             }
         });
 
-        // File chooser para vídeo
+        // Video
         btnBrowseVideo.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(Window.this);
@@ -138,7 +137,7 @@ public class Window extends JFrame {
         });
 
 
-        // ------ Botões de Ação ------
+        // Adicionar Personagem
         JButton btnAdd = new JButton("Adicionar");
         JButton btnClear = new JButton("Limpar");
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -149,10 +148,11 @@ public class Window extends JFrame {
             CharacterController controller = new CharacterController();
             try {
                 Map<String, String> formData = getFormData();
-                controller.saveCharacter(formData);
-                refreshAlbum(); // Atualiza a lista
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Erro ao salvar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                String type = getSelectedTabType(); // Determina a aba ativa
+                controller.saveCharacter(formData, type);
+                refreshAlbum();
+            } catch (IllegalArgumentException | IOException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -171,10 +171,10 @@ public class Window extends JFrame {
 
     // Método para criar um card de personagem
     public void refreshAlbum() {
-        albumPanel.removeAll(); // Limpa o painel
+        albumPanel.removeAll(); // Para limpar o painel
 
         CharacterDAOImpl dao = new CharacterDAOImpl();
-        List<Character> characters = dao.getAllCharacters();// Lista unificada
+        List<Character> characters = dao.getAllCharacters();
 
         for (Character character : characters) {
             JPanel card = createCharacterCard(character);
@@ -182,7 +182,7 @@ public class Window extends JFrame {
         }
 
         albumPanel.revalidate(); // Atualiza o layout
-        albumPanel.repaint(); // Redesenha a interface
+        albumPanel.repaint(); // Realoca o layout
     }
 
     private JPanel createCharacterCard(Character character) {
@@ -205,7 +205,7 @@ public class Window extends JFrame {
             card.add(new JLabel("Sem imagem"), BorderLayout.CENTER);
         }
 
-        // Adiciona listener de clique
+        // Adiciona função clique para abrir detalhes
         card.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -222,12 +222,14 @@ public class Window extends JFrame {
         return card;
     }
 
+
+    // Método para adicionar campos de informação
     private void showCharacterDetails(Character character) {
         JDialog detailsDialog = new JDialog(this, "Detalhes do Personagem", true);
         detailsDialog.setSize(800, 700);
         detailsDialog.setLayout(new BorderLayout());
 
-        // Painel de informações
+
         JPanel infoPanel = new JPanel(new GridLayout(0, 2, 10, 10));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -255,13 +257,13 @@ public class Window extends JFrame {
             imgLabel.setText("Sem imagem");
         }
 
-                // --- Botões de Ação (Fechar e Excluir) ---
+        // Editar, Fechar e Excluir
         JPanel buttonPanel = new JPanel();
         JButton btnClose = new JButton("Fechar");
         JButton btnDelete = new JButton("Excluir");
         JButton btnEdit = new JButton("Editar");
 
-        // Listener para o botão "Excluir"
+        // Adiciona ação para o botão de edição
         btnDelete.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(
                 detailsDialog,
@@ -273,9 +275,9 @@ public class Window extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
                 CharacterController controller = new CharacterController();
                 try {
-                    controller.deleteCharacter(character.getId()); // Passa o ID
-                    detailsDialog.dispose(); // Fecha a janela
-                    refreshAlbum(); // Atualiza a lista
+                    controller.deleteCharacter(character.getId()); // Passando o ID
+                    detailsDialog.dispose(); // Fechando a janela
+                    refreshAlbum(); // Atualizando a lista
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(
                         detailsDialog,
@@ -287,13 +289,13 @@ public class Window extends JFrame {
             }
         });
 
-        // Listener para o botão "Editar"
+        // Adiciona ação para o botão de edição
         btnEdit.addActionListener(e -> {
             detailsDialog.dispose(); // Fecha a janela de detalhes
             openEditWindow(character); // Abre a janela de edição
         });
 
-        // Listener para o botão "Fechar"
+        // Adiciona ação para o botão de fechar
         btnClose.addActionListener(e -> detailsDialog.dispose());
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
@@ -312,22 +314,24 @@ public class Window extends JFrame {
         panel.add(new JLabel(value));
     }
 
+
+    // Método para abrir a janela de edição
     private void openEditWindow(Character character) {
         JDialog editDialog = new JDialog(this, "Editar Personagem", true);
         editDialog.setSize(600, 500);
         editDialog.setLayout(new BorderLayout());
     
-        // --- Campos do Formulário (PRÉ-PREENCHIDOS) ---
+        // --- Campos do Formulário  ---
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 5, 5));
     
-        // Campos comuns
+        // Campos comuns 
         JTextField txtName = new JTextField(character.getName());
         JTextArea txtDescription = new JTextArea(character.getDescription());
         JTextArea txtPowers = new JTextArea(character.getPowers());
         JTextField txtTeam = new JTextField(character.getTeam());
         JTextArea txtSkills = new JTextArea(character.getSkills());
-        JTextField txtImagePath = new JTextField(); // Campo para nova imagem (opcional)
-        JTextField txtVideoPath = new JTextField(); // Campo para novo vídeo (opcional)
+        JTextField txtImagePath = new JTextField(); // Campo para nova imagem 
+        JTextField txtVideoPath = new JTextField(); // Campo para novo vídeo 
     
         // Campos específicos (Herói/Vilão)
         JTextField txtSpecificField;
@@ -352,15 +356,15 @@ public class Window extends JFrame {
         btnSave.addActionListener(e -> {
             // Coletar dados atualizados
             Map<String, String> updatedData = new HashMap<>();
-            updatedData.put("id", String.valueOf(character.getId())); // ID obrigatório
+            updatedData.put("id", String.valueOf(character.getId())); 
             updatedData.put("name", txtName.getText());
             updatedData.put("description", txtDescription.getText());
             updatedData.put("powers", txtPowers.getText());
             updatedData.put("team", txtTeam.getText());
             updatedData.put("skills", txtSkills.getText());
             updatedData.put("specificField", txtSpecificField.getText());
-            updatedData.put("imagePath", txtImagePath.getText()); // Opcional
-            updatedData.put("videoPath", txtVideoPath.getText()); // Opcional
+            updatedData.put("imagePath", txtImagePath.getText()); 
+            updatedData.put("videoPath", txtVideoPath.getText()); 
     
             try {
                 CharacterController controller = new CharacterController();
@@ -385,6 +389,15 @@ public class Window extends JFrame {
     }
     
     // Getter para o painel do álbum
+
+    // Usada para a seleção de campos especificos (Heroi ou Vilão?)
+    private String getSelectedTabType() {
+        if (txtUniverse.getText().isEmpty() && txtThreatLevel.getText().isEmpty()) {
+            throw new IllegalArgumentException("Selecione uma aba: Herói OU Vilão!");
+        }
+        return (!txtUniverse.getText().isEmpty()) ? "HERO" : "VILLAIN";
+    }
+    // Método para obter os dados do formulário
     public Map<String, String> getFormData() {
         Map<String, String> data = new HashMap<>();
         data.put("name", txtName.getText());
@@ -394,8 +407,8 @@ public class Window extends JFrame {
         data.put("skills", txtSkills.getText());
         data.put("imagePath", txtImagePath.getText());
         data.put("videoPath", txtVideoPath.getText());
-        data.put("universe", txtUniverse.getText());         // Aba herói
-        data.put("threatLevel", txtThreatLevel.getText());   // Aba vilão
+        data.put("universe", txtUniverse.getText());         
+        data.put("threatLevel", txtThreatLevel.getText());   
         return data;
     }
 

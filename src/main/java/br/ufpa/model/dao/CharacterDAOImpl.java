@@ -7,6 +7,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Implementa o contrato de CharacterDAO e executa operações de banco de dados
+ */
+
 public class CharacterDAOImpl implements CharacterDAO {
     
     @Override

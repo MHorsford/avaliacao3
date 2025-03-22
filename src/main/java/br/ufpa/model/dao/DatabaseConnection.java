@@ -6,21 +6,27 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+/*
+ * Classe responsável por estabelecer a conexão com o banco de dados e criar a tabela SQLite
+ */
 public class DatabaseConnection {
-    // Relative path to the project
+
     private static final String DB_PATH = "database/album.db";
 
+    // Método para estabelecer uma conexão com o banco de dados
     public static Connection getConnection() throws SQLException {
-        // Creates the "database" folder if it does not exist
+        // Cria a pasta 'database' se ela não existir
         try {
-            Files.createDirectories(Paths.get("database")); // Creates the folder and necessary subfolders
+            Files.createDirectories(Paths.get("src/database")); // Cria a pasta 'database'
         } catch (Exception e) {
             throw new SQLException("Failed to create 'database' folder", e);
         }
         return DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
     }
 
+    // Método para criar a tabela 'Characters' no banco de dados
+    // Este método é chamado quando a aplicação é iniciada
+    // Tipo BLOBS são usados para armazenar imagens e vídeos no SQLite
     public static void createTable() {
         String sql = """
             CREATE TABLE IF NOT EXISTS Characters (
