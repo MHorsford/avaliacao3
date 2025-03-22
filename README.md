@@ -17,9 +17,9 @@ Aplicação CRUD em Java Swing para gerenciar um "álbum" de personagens de quad
 - **Operações CRUD**:
   - Adicionar, editar, excluir e listar personagens.
 - **Interface Gráfica**:
-  - Navegação entre personagens (Próximo/Anterior).
+  - Navegação entre personagens.
   - Reprodutor de vídeo integrado (Play/Pause).
-- **Persistência de Dados**: Armazenamento em banco de dados **SQLite**.
+- **Persistência de Dados**: Armazenamento em banco de dados **SQLite** ja preparado para a execução.
 
 ---
 
